@@ -1,0 +1,20 @@
+version: '2'
+services:
+  nginx:
+    build: docker_images/nginx
+    ports:
+      - 80:80
+    volumes:
+      - ./docker_images/nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ./docker_images/nginx/nginx.htpasswd:/etc/nginx/.htpasswd
+      - ./:/var/www/html
+      - ./docker_images/nginx/default.template.conf:/etc/nginx/conf.d/default.template
+    links:
+      - php
+  php:
+    build:
+      context: docker_images/php
+      args:
+        USER: ntq
+    volumes:
+      - ./:/var/www/html

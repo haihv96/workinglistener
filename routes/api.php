@@ -1,7 +1,5 @@
 <?php
 
-use Illuminate\Http\Request;
-
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -12,13 +10,3 @@ use Illuminate\Http\Request;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
-
-Route::post('hooks/skype', function () {
-    \Log::info('Skype push me an event');
-    \Log::info(request()->all());
-});
-
-Route::post('hooks/gitlab', function () {
-    \Log::info('Gitlab push me an event');
-    \Log::info(request()->all());
-});

@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateUsersTable extends Migration
+class CreateGitProjectsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,13 +13,14 @@ class CreateUsersTable extends Migration
      */
     public function up()
     {
-        Schema::create('users', function (Blueprint $table) {
+        Schema::create('project_gits', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->string('skype_id')->unique();
-            $table->string('chat_id')->nullable();
-            $table->string('skype_name')->nullable();
-            $table->string('git_account')->nullable();
-            $table->string('role')->nullable();
+            $table->unsignedBigInteger('project_id');
+            $table->foreign('project_id')
+                ->references('id')
+                ->on('projects')
+                ->onDelete('cascade');
+            $table->string('repo_name')->unique();
             $table->timestamps();
         });
     }

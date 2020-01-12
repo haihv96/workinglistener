@@ -46,6 +46,7 @@ class RouteServiceProvider extends ServiceProvider
 
         $this->mapWebRoutes();
 
+        $this->mapHookRoutes();
         //
     }
 
@@ -76,5 +77,15 @@ class RouteServiceProvider extends ServiceProvider
              ->middleware('api')
              ->namespace($this->namespace)
              ->group(base_path('routes/api.php'));
+    }
+
+    /**
+     * Define the "hooks" route use for third party communicate with system
+     */
+    protected function mapHookRoutes()
+    {
+        Route::prefix('hooks')
+            ->namespace($this->namespace . '\\Hooks')
+            ->group(base_path('routes/hook.php'));
     }
 }

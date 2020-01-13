@@ -19,6 +19,7 @@ class CreateUsersTable extends Migration
             $table->string('chat_id')->nullable();
             $table->string('skype_name')->nullable();
             $table->string('git_account')->nullable();
+            $table->string('skype_live')->nullable();
             $table->string('role')->nullable();
             $table->timestamps();
         });

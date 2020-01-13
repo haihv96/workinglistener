@@ -26,9 +26,4 @@ class ChatbotService extends ApiBaseService
             ]
         ]);
     }
-
-    public function sendMessageToGroupAndTag()
-    {
-
-    }
 }

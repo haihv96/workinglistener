@@ -56,14 +56,14 @@ class SkypeHookHandle extends BaseService
                 $user = User::create(['skype_id' => $skypeId]);
             }
             $user->update(['skype_name' => $skypeName]);
-            if (strpos($text, 'register')) {
+            if (strpos(' ' . $text, 'register')) {
                 $dataRegisterString = trim(\Str::after($text, 'register'));
                 $dataRegisterArr = explode(',', $dataRegisterString);
                 foreach ($dataRegisterArr as $dataRegister) {
                     \Log::info($dataRegister);
                     list($key, $value) = explode('=', $dataRegister);
                     $user->update([
-                        $key => $value
+                        trim($key) => trim($value)
                     ]);
                 }
             }

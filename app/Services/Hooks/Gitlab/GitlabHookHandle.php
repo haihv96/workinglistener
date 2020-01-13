@@ -43,13 +43,14 @@ class GitlabHookHandle extends BaseService
         $sourceBranch = $hookData['object_attributes']['source_branch'];
         $target = $hookData['object_attributes']['target_branch'];
         $mergeRequestId = $hookData['object_attributes']['iid'];
+        $mergeRequestDescription = $hookData['object_attributes']['description'];
         $authorEmail = $hookData['object_attributes']['last_commit']['author']['email'];
         $mergeRequestUrl = "$projectUrl/merge_requests/$mergeRequestId/diffs";
         $conversationId = ProjectGit::where(['repo_name' => $projectUrl])->first()->project->skype_id;
         $author = User::where(['git_account' => $authorEmail])->first();
         $messageObject = new BotMessageObject(
             BotMessageObject::BOT_MESSAGE_TYPE,
-            "<at id='$author->skype_live'>@$author->skype_name</at> MERGED **$sourceBranch** INTO **$target** \n $mergeRequestUrl"
+            "<at id='$author->skype_live'>@$author->skype_name</at> MERGED **$sourceBranch** INTO **$target** \n $mergeRequestUrl \n $mergeRequestDescription"
         );
         $this->chatbotService->sendMessage($conversationId, $messageObject);
     }

@@ -15,6 +15,8 @@ class GitlabHookHandle extends BaseService
     protected $chatbotService;
 
     const MERGE_REQUEST_EVENT_TYPE = 'merge_request';
+    const BUILD_OBJECT_KIND = 'build';
+    const BUILD_OBJECT_SUCCESS_STATUS = 'success';
 
     public function __construct(ChatbotService $chatbotService)
     {
@@ -26,10 +28,16 @@ class GitlabHookHandle extends BaseService
         $hookData = $request->all();
         \Log::info('Gitlab hooks data receiver');
         \Log::info($hookData);
-        $eventType = $hookData['event_type'];
+        $eventType = \Arr::get($hookData, 'event_type');
+        $objectKind = \Arr::get($hookData, 'object_kind');
         switch ($eventType) {
             case self::MERGE_REQUEST_EVENT_TYPE:
                 $this->mergeRequestHandle($hookData);
+        }
+
+        switch ($objectKind) {
+            case self::BUILD_OBJECT_KIND:
+                $this->buildEventHandle($hookData);
         }
     }
 
@@ -51,6 +59,25 @@ class GitlabHookHandle extends BaseService
         $messageObject = new BotMessageObject(
             BotMessageObject::BOT_MESSAGE_TYPE,
             "<at id='$author->skype_live'>@$author->skype_name</at> MERGED **$sourceBranch** INTO **$target** \n $mergeRequestUrl \n $mergeRequestDescription"
+        );
+        $this->chatbotService->sendMessage($conversationId, $messageObject);
+    }
+
+    public function buildEventHandle($hookData)
+    {
+        $status = $hookData['commit']['status'];
+        if ($status !== self::BUILD_OBJECT_SUCCESS_STATUS) {
+            return;
+        }
+        $projectUrl = $hookData['repository']['homepage'];
+        $conversationId = ProjectGit::where(['repo_name' => $projectUrl])->first()->project->skype_id;
+        $message = $hookData['commit']['message'];
+        $dataExplode = explode('!', $message);
+        $mergeRequestId = $dataExplode[sizeof($dataExplode) - 1];
+        $mergeRequestUrl = "$projectUrl/merge_requests/$mergeRequestId/diffs";
+        $messageObject = new BotMessageObject(
+            BotMessageObject::BOT_MESSAGE_TYPE,
+            "<at id='$conversationId'>@all</at> $message \n $mergeRequestUrl"
         );
         $this->chatbotService->sendMessage($conversationId, $messageObject);
     }

@@ -3,7 +3,7 @@ services:
   nginx:
     build: docker_images/nginx
     ports:
-      - 80:80
+      - 8241:80
     volumes:
       - ./docker_images/nginx/default.conf:/etc/nginx/conf.d/default.conf
       - ./docker_images/nginx/nginx.htpasswd:/etc/nginx/.htpasswd
@@ -18,3 +18,25 @@ services:
         USER: ntq
     volumes:
       - ./:/var/www/html
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    environment:
+      PMA_HOST: mysql-docker
+      PMA_PORT: 3306
+    ports:
+      - 8585:80
+  mysql-docker:
+    build: docker_images/mysql
+    environment:
+      MYSQL_DATABASE: gcweb_local
+      MYSQL_USER: gcweb
+      MYSQL_PASSWORD: 123456
+      MYSQL_ROOT_PASSWORD: 123456
+    ports:
+      - 2001:3306
+    volumes:
+      - type: bind
+        source: /usr/shared/gcweb/mysql
+        target: /var/lib/mysql
+        volume:
+          nocopy: true

@@ -17,6 +17,7 @@ class GitlabHookHandle extends BaseService
     const MERGE_REQUEST_EVENT_TYPE = 'merge_request';
     const BUILD_OBJECT_KIND = 'build';
     const BUILD_OBJECT_SUCCESS_STATUS = 'success';
+    const TARGET_BRANCH = ['dev', 'master'];
 
     public function __construct(ChatbotService $chatbotService)
     {
@@ -47,9 +48,12 @@ class GitlabHookHandle extends BaseService
         if ($status !== 'merged') {
             return;
         }
+        $target = $hookData['object_attributes']['target_branch'];
+        if (!in_array($target, self::TARGET_BRANCH)) {
+            return;
+        }
         $projectUrl = $hookData['project']['web_url'];
         $sourceBranch = $hookData['object_attributes']['source_branch'];
-        $target = $hookData['object_attributes']['target_branch'];
         $mergeRequestId = $hookData['object_attributes']['iid'];
         $mergeRequestDescription = $hookData['object_attributes']['description'];
         $authorEmail = $hookData['object_attributes']['last_commit']['author']['email'];
@@ -65,8 +69,9 @@ class GitlabHookHandle extends BaseService
 
     public function buildEventHandle($hookData)
     {
+        $buildStage = \Arr::get($hookData, 'build_stage');
         $status = $hookData['commit']['status'];
-        if ($status !== self::BUILD_OBJECT_SUCCESS_STATUS) {
+        if ($status !== self::BUILD_OBJECT_SUCCESS_STATUS || $buildStage !== 'deploy') {
             return;
         }
         $projectUrl = $hookData['repository']['homepage'];
@@ -77,7 +82,7 @@ class GitlabHookHandle extends BaseService
         $mergeRequestUrl = "$projectUrl/merge_requests/$mergeRequestId/diffs";
         $messageObject = new BotMessageObject(
             BotMessageObject::BOT_MESSAGE_TYPE,
-            "<at id='$conversationId'>@all</at> $message \n $mergeRequestUrl"
+            "<at id='$conversationId'>@all</at> \n Đã deploy lên test server: http://cms.ntq.solutions/auth \n $message \n $mergeRequestUrl"
         );
         $this->chatbotService->sendMessage($conversationId, $messageObject);
     }

@@ -26,6 +26,9 @@ RUN apt-get install -y --no-install-recommends \
     supervisor
 RUN pecl install mongodb
 RUN docker-php-ext-enable mongodb
+RUN pecl install redis \
+    && docker-php-ext-enable redis
+
 COPY ./xdebug.ini /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
 COPY ./supervisord.conf /etc/supervisor/supervisord.conf
 COPY ./supervisord_configs/ /etc/supervisor/conf.d
